@@ -1,0 +1,40 @@
+require 'net/http'
+require 'kconv'
+
+index = "abcdefghijklmnopqrstuvwxyz"
+
+index.split(//).each do |i|
+  Net::HTTP.start('www.patro.co.jp', 80) do |http|
+    response = http.get("/glossaries/dic_e-j_#{i}.html")
+    File.open("results/index_#{i}.txt", "w") do |f|
+      f.write(response.body)
+    end
+  end
+end
+
+$writable = false
+
+def find_target(line)
+  if line =~ /^\s*<[^>]{1,}>(.*)/
+    next_line = $1
+    find_target(next_line) if next_line.size > 0
+  elsif line =~ /^([^<]{1,})(<.*)/
+    target = $1
+    next_line = $2
+
+    target = target.strip
+    $writable = false if target == "凡例および主要参考文献".tosjis
+    puts target.strip.tosjis if $writable
+    $writable = true if target  == "/ X / Y / Z"
+
+    find_target(next_line)
+  end
+end
+
+index.split(//).each do |i|
+  File.open("results/index_#{i}.txt", "r") do |f|
+    while line = f.gets
+      find_target(line)
+    end
+  end
+end
