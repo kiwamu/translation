@@ -6,8 +6,8 @@ LINE_SPACE = 2
 DICT_FILE_JP = "optronics_j.txt"
 DICT_FILE_EN = "optronics_e.txt"
 
-FileUtils.rm(DICT_FILE_JP)
-FileUtils.rm(DICT_FILE_EN)
+FileUtils.rm_f(DICT_FILE_JP)
+FileUtils.rm_f(DICT_FILE_EN)
 
 (1..9611).each do |i|
   Net::HTTP.start('www.optronics.co.jp', 80) do |http|
