@@ -11,6 +11,7 @@ $dict_map = { }
 
 def https
   https = Net::HTTP.new('www-06.ibm.com', 443)
+#  https = Net::HTTP::Proxy('10.9.21.20', '8000').new('www-06.ibm.com', 443)
   https.use_ssl = true
   https.ca_file = './base64.cer'
   https.verify_mode = OpenSSL::SSL::VERIFY_PEER
@@ -36,8 +37,8 @@ def do_search(word)
         do_search(new_word)
       else
         extract_data(page) unless $1.to_i == 0
-        return nil if word.split(//)[0] == "z"
         new_word = next_search_word(word)
+        return nil if new_word == $break_word
         do_search(new_word)
       end
     end
@@ -49,6 +50,7 @@ def extend_search_word(word)
 end
 
 def next_search_word(word)
+  return "z" if word == "z"
   last = word.split(//)[-1]
   if last == "z"
     word[-2] = word[-2].next
@@ -101,5 +103,24 @@ end
 FileUtils.rm_f(DICT_FILE_JP)
 FileUtils.rm_f(DICT_FILE_EN)
 
-do_search("a")
+("a".."z").to_a.each do |letter|
+  if letter == "s"
+    # special
+    $break_word = "ss"
+    do_search("sr")
+#    do_search("s")
+
+    $break_word = "t"
+    do_search("ss")
+  else
+    # general
+    from = letter
+    to = letter.next unless letter == "z"
+    to = letter if letter == "z"
+
+    $break_word = to
+    do_search(from)
+  end
+end
+
 write($dict_map)
