@@ -1,0 +1,10 @@
+#! /usr/bin/ruby
+
+require 'net/http'
+
+Net::HTTP.version_1_2
+
+Net::HTTP.start('www-06.ibm.com', 80) do |http|
+response = http.post('/jp/manuals/nlsdic/nlsdic.jsp#result',"Eng=a")
+  puts response.body
+end
